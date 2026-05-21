@@ -17,6 +17,7 @@ jobs:
 
       - name: Create launcher icons
         run: |
+          pip install Pillow -q
           python3 - <<'EOF'
           from PIL import Image, ImageDraw
           import os
