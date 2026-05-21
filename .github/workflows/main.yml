@@ -10,16 +10,19 @@ jobs:
       - name: Unzip project
         run: unzip HunterGame.zip -d extracted
 
-      - name: Show extracted contents
-        run: find extracted -maxdepth 3 -type f | head -30
-
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permission
-        run: chmod +x extracted/HunterGame/gradlew
+      - name: Setup Gradle wrapper
+        working-directory: extracted/HunterGame
+        run: |
+          gradle wrapper --gradle-version=8.4
+        env:
+          GRADLE_USER_HOME: /root/.gradle
+
+      - uses: gradle/actions/setup-gradle@v3
 
       - name: Build APK
         working-directory: extracted/HunterGame
