@@ -17,16 +17,23 @@ jobs:
 
       - name: Create launcher icons
         run: |
-          mkdir -p extracted/HunterGame/app/src/main/res/mipmap-hdpi
-          mkdir -p extracted/HunterGame/app/src/main/res/mipmap-mdpi
-          mkdir -p extracted/HunterGame/app/src/main/res/mipmap-xhdpi
-          mkdir -p extracted/HunterGame/app/src/main/res/mipmap-xxhdpi
-          cd extracted/HunterGame/app/src/main/res
-          for dir in mipmap-hdpi mipmap-mdpi mipmap-xhdpi mipmap-xxhdpi; do
-            cp /usr/local/lib/android/sdk/platforms/android-33/data/res/drawable-hdpi/sym_def_app_icon.png $dir/ic_launcher.png 2>/dev/null || \
-            convert -size 72x72 xc:#1A3A1A $dir/ic_launcher.png
-            cp $dir/ic_launcher.png $dir/ic_launcher_round.png
-          done
+          python3 - <<'EOF'
+          from PIL import Image, ImageDraw
+          import os
+          sizes = {
+            'mipmap-mdpi': 48, 'mipmap-hdpi': 72,
+            'mipmap-xhdpi': 96, 'mipmap-xxhdpi': 144, 'mipmap-xxxhdpi': 192
+          }
+          base = 'extracted/HunterGame/app/src/main/res'
+          for folder, size in sizes.items():
+            os.makedirs(f'{base}/{folder}', exist_ok=True)
+            img = Image.new('RGB', (size, size), color=(26, 58, 26))
+            d = ImageDraw.Draw(img)
+            d.ellipse([size//4, size//4, 3*size//4, 3*size//4], fill=(255, 215, 0))
+            img.save(f'{base}/{folder}/ic_launcher.png')
+            img.save(f'{base}/{folder}/ic_launcher_round.png')
+          print('Icons created!')
+          EOF
 
       - name: Download Gradle wrapper
         working-directory: extracted/HunterGame
