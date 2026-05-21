@@ -15,11 +15,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Create launcher icons
+        run: |
+          mkdir -p extracted/HunterGame/app/src/main/res/mipmap-hdpi
+          mkdir -p extracted/HunterGame/app/src/main/res/mipmap-mdpi
+          mkdir -p extracted/HunterGame/app/src/main/res/mipmap-xhdpi
+          mkdir -p extracted/HunterGame/app/src/main/res/mipmap-xxhdpi
+          cd extracted/HunterGame/app/src/main/res
+          for dir in mipmap-hdpi mipmap-mdpi mipmap-xhdpi mipmap-xxhdpi; do
+            cp /usr/local/lib/android/sdk/platforms/android-33/data/res/drawable-hdpi/sym_def_app_icon.png $dir/ic_launcher.png 2>/dev/null || \
+            convert -size 72x72 xc:#1A3A1A $dir/ic_launcher.png
+            cp $dir/ic_launcher.png $dir/ic_launcher_round.png
+          done
+
       - name: Download Gradle wrapper
         working-directory: extracted/HunterGame
         run: |
-          curl -L https://services.gradle.org/distributions/gradle-8.4-bin.zip -o gradle.zip
-          unzip gradle.zip
           mkdir -p gradle/wrapper
           echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip" > gradle/wrapper/gradle-wrapper.properties
           curl -L https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
