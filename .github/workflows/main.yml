@@ -15,14 +15,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle wrapper
+      - name: Download Gradle wrapper
         working-directory: extracted/HunterGame
         run: |
-          gradle wrapper --gradle-version=8.4
-        env:
-          GRADLE_USER_HOME: /root/.gradle
-
-      - uses: gradle/actions/setup-gradle@v3
+          curl -L https://services.gradle.org/distributions/gradle-8.4-bin.zip -o gradle.zip
+          unzip gradle.zip
+          mkdir -p gradle/wrapper
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip" > gradle/wrapper/gradle-wrapper.properties
+          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
+          curl -L https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradlew -o gradlew
+          chmod +x gradlew
 
       - name: Build APK
         working-directory: extracted/HunterGame
