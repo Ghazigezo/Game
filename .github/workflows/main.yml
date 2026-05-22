@@ -36,6 +36,72 @@ jobs:
           print('Icons created!')
           EOF
 
+      - name: Fix code errors
+        run: |
+          sed -i 's/playTone(800.0, 0.08, 0.6)/playTone(800.0, 0.08, 0.6f)/' extracted/HunterGameV2_fixed/app/src/main/java/com/hunterGame/utils/SoundManager.kt
+          sed -i 's/playTone(400.0, 0.06, 0.4)/playTone(400.0, 0.06, 0.4f)/' extracted/HunterGameV2_fixed/app/src/main/java/com/hunterGame/utils/SoundManager.kt
+          sed -i 's/playTone(600.0, 0.15, 0.8, true)/playTone(600.0, 0.15, 0.8f, true)/' extracted/HunterGameV2_fixed/app/src/main/java/com/hunterGame/utils/SoundManager.kt
+          sed -i 's/playTone(1200.0, 0.05, 0.3)/playTone(1200.0, 0.05, 0.3f)/' extracted/HunterGameV2_fixed/app/src/main/java/com/hunterGame/utils/SoundManager.kt
+          sed -i 's/playTone(200.0, 0.1, 0.3)/playTone(200.0, 0.1, 0.3f)/' extracted/HunterGameV2_fixed/app/src/main/java/com/hunterGame/utils/SoundManager.kt
+          cat > extracted/HunterGameV2_fixed/app/src/main/java/com/hunterGame/activities/MissionsActivity.kt << 'KOTLIN'
+          package com.hunterGame.activities
+          import android.graphics.Color
+          import android.os.Bundle
+          import android.widget.*
+          import androidx.appcompat.app.AppCompatActivity
+          import com.hunterGame.R
+          import com.hunterGame.models.MissionCatalog
+          import com.hunterGame.models.MissionType
+          import com.hunterGame.utils.GamePreferences
+          class MissionsActivity : AppCompatActivity() {
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  setContentView(R.layout.activity_missions)
+                  val p = GamePreferences.loadPlayer(this)
+                  val container = findViewById<LinearLayout>(R.id.missionsContainer)
+                  MissionCatalog.missions.forEach { m ->
+                      val done = p.completedMissions.contains(m.id)
+                      val progress = when (m.type) {
+                          MissionType.KILL_ANIMALS -> "${minOf(p.totalAnimalsKilled, m.targetCount)}/${m.targetCount}"
+                          MissionType.REACH_LEVEL  -> "${minOf(p.highestLevel, m.targetCount)}/${m.targetCount}"
+                          MissionType.EARN_COINS   -> "${minOf(p.totalScore, m.targetCount)}/${m.targetCount}"
+                          MissionType.VISIT_TRADER -> if (done) "1/1" else "0/1"
+                          MissionType.BUY_HOUSE    -> if (done) "1/1" else "0/1"
+                      }
+                      val card = LinearLayout(this).apply {
+                          orientation = LinearLayout.VERTICAL
+                          setPadding(20,20,20,20)
+                          setBackgroundColor(if (done) Color.parseColor("#1B5E20") else Color.parseColor("#1A1A1A"))
+                          layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0,0,0,12) }
+                      }
+                      card.addView(TextView(this).apply {
+                          text = "${m.emoji} ${m.titleAr} ${if (done) "✅" else ""}"
+                          textSize = 19f
+                          setTextColor(if (done) Color.parseColor("#A5D6A7") else Color.WHITE)
+                      })
+                      card.addView(TextView(this).apply { text = m.descAr; textSize = 13f; setTextColor(Color.LTGRAY) })
+                      card.addView(TextView(this).apply {
+                          text = "التقدم: $progress | المكافأة: ${m.rewardCoins}"
+                          textSize = 13f
+                          setTextColor(Color.parseColor("#FFD700"))
+                      })
+                      val barVal = when (m.type) {
+                          MissionType.KILL_ANIMALS -> p.totalAnimalsKilled
+                          MissionType.REACH_LEVEL  -> p.highestLevel
+                          MissionType.EARN_COINS   -> p.totalScore
+                          else -> if (done) m.targetCount else 0
+                      }
+                      val bar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal)
+                      bar.max = m.targetCount
+                      bar.progress = barVal
+                      bar.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 20).apply { setMargins(0,8,0,0) }
+                      card.addView(bar)
+                      container.addView(card)
+                  }
+              }
+          }
+          KOTLIN
+
       - name: Download Gradle wrapper
         working-directory: extracted/HunterGameV2_fixed
         run: |
