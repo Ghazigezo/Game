@@ -8,7 +8,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Unzip project
-        run: unzip HunterGame.zip -d extracted
+        run: unzip HunterGameV2.zip -d extracted
 
       - uses: actions/setup-java@v4
         with:
@@ -25,10 +25,10 @@ jobs:
             'mipmap-mdpi': 48, 'mipmap-hdpi': 72,
             'mipmap-xhdpi': 96, 'mipmap-xxhdpi': 144, 'mipmap-xxxhdpi': 192
           }
-          base = 'extracted/HunterGame/app/src/main/res'
+          base = 'extracted/HunterGameV2/app/src/main/res'
           for folder, size in sizes.items():
             os.makedirs(f'{base}/{folder}', exist_ok=True)
-            img = Image.new('RGB', (size, size), color=(26, 58, 26))
+            img = Image.new('RGB', (size, size), color=(10, 10, 26))
             d = ImageDraw.Draw(img)
             d.ellipse([size//4, size//4, 3*size//4, 3*size//4], fill=(255, 215, 0))
             img.save(f'{base}/{folder}/ic_launcher.png')
@@ -37,7 +37,7 @@ jobs:
           EOF
 
       - name: Download Gradle wrapper
-        working-directory: extracted/HunterGame
+        working-directory: extracted/HunterGameV2
         run: |
           mkdir -p gradle/wrapper
           echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip" > gradle/wrapper/gradle-wrapper.properties
@@ -46,10 +46,10 @@ jobs:
           chmod +x gradlew
 
       - name: Build APK
-        working-directory: extracted/HunterGame
+        working-directory: extracted/HunterGameV2
         run: ./gradlew assembleDebug
 
       - uses: actions/upload-artifact@v4
         with:
-          name: HunterGame-APK
-          path: extracted/HunterGame/app/build/outputs/apk/debug/*.apk
+          name: HunterGameV2-APK
+          path: extracted/HunterGameV2/app/build/outputs/apk/debug/*.apk
